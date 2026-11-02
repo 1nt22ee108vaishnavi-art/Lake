@@ -1037,6 +1037,7 @@ function updateDucks(dt) {
 /* ---------------------------------------------------------------- cats, kittens & dogs */
 const CAT_HOME = { x: -107, z: 67, r: 9 };
 const DOG_HOME = { x: FIRE.x, z: FIRE.z - 4, r: 13 };
+const HOUSE_DOG_HOME = { x: -102, z: 56, r: 10 };
 function makePet(o) {
   const dog = o.kind === 'dog', g = new THREE.Group(), rig = new THREE.Group(); g.add(rig);
   const M = (c) => mat(c);
@@ -1091,11 +1092,14 @@ const pets = [];
   kitten({ name: 'biscuit', body: BR, patch: W, legs: W, headPatch: W, ear: BR }, mochi, 0.7);
   add({ kind: 'dog', name: 'bruno', body: 0x8a5a3a, patch: 0x2a2228, ear: 0x2a2228, tail: 0x2a2228, snout: 0x6b4a3a, slot: 0.9 }, DOG_HOME);
   add({ kind: 'dog', name: 'cloud', body: 0xf4f1ea, ear: 0xe8dccb, slot: -0.9 }, DOG_HOME);
+  // the house dogs: a big fluffy white one and a brown & black shepherd
+  add({ kind: 'dog', name: 'luna', body: 0xfbf8f2, head: 0xfbf8f2, ear: 0xf4f1ea, snout: 0xffffff, scale: 1.15, slot: 1.7 }, HOUSE_DOG_HOME);
+  add({ kind: 'dog', name: 'max', body: 0x7a4a2e, patch: 0x221c20, headPatch: 0x221c20, ear: 0x221c20, tail: 0x221c20, snout: 0x2e2428, legs: 0x9a6440, scale: 1.2, slot: -1.7 }, HOUSE_DOG_HOME);
 }
 const PET_LINES = {
   cat: ['{n} purrs and leans into your hand.', '{n} headbutts your palm. you have been chosen.', '{n} blinks at you slowly. that means i love you, in cat.', '{n} flops over and shows you her belly. it is a trap.'],
   kitten: ['{n} tries to bite your finger. it does not hurt at all.', '{n} mews and climbs onto your shoe.', '{n} is very small and very sure of themselves.', '{n} pounces on your shoelace, then falls over.'],
-  dog: ["{n}'s whole body wags.", '{n} gives you a very serious paw. you shake it.', '{n} rolls onto his back immediately. good boy.', '{n} brings you a stick from nowhere.'],
+  dog: ["{n}'s whole body wags.", '{n} gives you a very serious paw. you shake it.', '{n} rolls over for belly rubs immediately. good dog.', '{n} brings you a stick from nowhere.'],
 };
 const PET_GIRL = ['aww, they like you.', "they never let me pet them like that!", 'okay, that is the cutest thing i have ever seen.', 'can we keep them? ...they already live here, huh.'];
 // little hearts that float up when you pet someone
