@@ -2,3 +2,5 @@
 _test.html
 .DS_Store
 Thumbs.db
+
+.vercel
