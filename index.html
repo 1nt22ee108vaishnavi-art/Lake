@@ -1036,8 +1036,9 @@ function updateDucks(dt) {
 
 /* ---------------------------------------------------------------- cats, kittens & dogs */
 const CAT_HOME = { x: -107, z: 67, r: 9 };
-const DOG_HOME = { x: FIRE.x, z: FIRE.z - 4, r: 13 };
-const HOUSE_DOG_HOME = { x: -102, z: 56, r: 10 };
+// all the dogs live around the big house: two by the front porch, two along the north side
+const HOUSE_DOG_HOME = { x: -109, z: 58, r: 5 };
+const DOG_HOME = { x: -112, z: 47, r: 6 };
 function makePet(o) {
   const dog = o.kind === 'dog', g = new THREE.Group(), rig = new THREE.Group(); g.add(rig);
   const M = (c) => mat(c);
