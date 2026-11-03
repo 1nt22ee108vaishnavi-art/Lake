@@ -2,14 +2,16 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
 <title>lake</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet" />
 <style>
   * { box-sizing: border-box; }
-  html, body { margin: 0; height: 100%; overflow: hidden; background: #1d1b2e; font-family: 'VT323', monospace; color: #fff4e6; user-select: none; }
-  #c { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block; image-rendering: pixelated; filter: saturate(.95) contrast(1.04) sepia(.04); cursor: grab; }
+  html, body { margin: 0; height: 100%; overflow: hidden; overscroll-behavior: none; touch-action: none; -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none; background: #1d1b2e; font-family: 'VT323', monospace; color: #fff4e6; user-select: none; }
+  #c { position: fixed; inset: 0; width: 100%; height: 100%; touch-action: none; display: block; image-rendering: pixelated; filter: saturate(.95) contrast(1.04) sepia(.04); cursor: grab; }
   #c:active { cursor: grabbing; }
   #grain { position: fixed; inset: -50%; width: 200%; height: 200%; pointer-events: none; opacity: .09; animation: grain 1s steps(6) infinite; }
   @keyframes grain { 0%{transform:translate(0,0)} 20%{transform:translate(-5%,3%)} 40%{transform:translate(4%,-6%)} 60%{transform:translate(-3%,5%)} 80%{transform:translate(6%,2%)} 100%{transform:translate(0,0)} }
@@ -63,6 +65,46 @@
   #overlay .start { margin-top: 26px; font-size: 30px; animation: blink 1.6s steps(2) infinite; }
   #overlay .keys { margin-top: 30px; font-size: 20px; opacity: .7; }
   @keyframes blink { 50% { opacity: .3; } }
+
+  /* touch controls (phones / tablets) */
+  #touch { display: none; }
+  body.touch #touch { display: block; }
+  body.touch #help { display: none; }
+  #stick { position: fixed; left: calc(22px + env(safe-area-inset-left)); bottom: calc(22px + env(safe-area-inset-bottom)); width: 130px; height: 130px; border-radius: 50%;
+    background: rgba(35,25,50,.35); border: 2px solid rgba(255,244,230,.45); touch-action: none; }
+  #knob { position: absolute; left: 50%; top: 50%; width: 56px; height: 56px; margin: -28px 0 0 -28px; border-radius: 50%; background: rgba(255,244,230,.55); box-shadow: 0 2px 0 rgba(20,10,30,.4); }
+  #tBtns { position: fixed; right: calc(22px + env(safe-area-inset-right)); bottom: calc(22px + env(safe-area-inset-bottom)); display: flex; gap: 14px; align-items: flex-end; }
+  #tBtns button { font: inherit; color: #fff4e6; background: rgba(35,25,50,.5); border: 2px solid rgba(255,244,230,.6); border-radius: 50%; touch-action: none; padding: 0; }
+  #tBtns button:active, #tBtns button.down { background: rgba(255,201,143,.45); }
+  #tAct { width: 78px; height: 78px; font-size: 30px; }
+  #tJump { width: 62px; height: 62px; font-size: 19px; margin-bottom: 40px; }
+  body.touch #prompt { bottom: auto; top: calc(66px + env(safe-area-inset-top)); }
+  body.touch #prompt.show { pointer-events: auto; }
+  body.touch #card { bottom: calc(170px + env(safe-area-inset-bottom)); max-height: 45vh; overflow-y: auto; }
+  body.touch #card.show { pointer-events: auto; }
+  body.touch #card .opt { padding: 5px 6px; }
+  @media (max-width: 700px), (max-height: 500px) {
+    #title { top: calc(12px + env(safe-area-inset-top)); left: calc(14px + env(safe-area-inset-left)); font-size: 26px; }
+    #title small { font-size: 17px; }
+    #music { top: calc(12px + env(safe-area-inset-top)); right: calc(14px + env(safe-area-inset-right)); font-size: 17px; }
+    #music span { display: none; }
+    #moodBtn { top: calc(40px + env(safe-area-inset-top)); right: calc(14px + env(safe-area-inset-right)); }
+    #callBtn { top: calc(40px + env(safe-area-inset-top)); right: calc(96px + env(safe-area-inset-right)); }
+    #moodPanel { top: calc(68px + env(safe-area-inset-top)); right: 10px; width: min(300px, calc(100vw - 20px)); max-height: calc(100% - 90px); }
+    #prompt { font-size: 21px; white-space: nowrap; }
+    #card { font-size: 20px; padding: 10px 14px; width: min(560px, 94vw); }
+    #score { font-size: 24px; }
+    #overlay h1 { font-size: clamp(60px, 18vw, 110px); }
+    #overlay p { font-size: 21px; }
+    #overlay .start { font-size: 26px; }
+    #overlay .keys { font-size: 18px; padding: 0 16px; }
+  }
+  @media (max-height: 500px) {
+    #stick { width: 110px; height: 110px; }
+    body.touch #card { bottom: calc(14px + env(safe-area-inset-bottom)); width: min(440px, 50vw); max-height: 60vh; }
+    #overlay .keys { margin-top: 14px; }
+    #overlay .start { margin-top: 12px; }
+  }
 </style>
 </head>
 <body>
@@ -96,6 +138,10 @@
 <div class="hud" id="prompt"></div>
 <div class="hud" id="card"></div>
 <div id="fade"></div>
+<div id="touch">
+  <div id="stick"><div id="knob"></div></div>
+  <div id="tBtns"><button id="tJump">jump</button><button id="tAct">e</button></div>
+</div>
 
 <div id="overlay">
   <h1>lake</h1>
@@ -154,6 +200,7 @@ const HOUSE = { x: -130, z: 62, hw: 13, hd: 10 }; // big house on the west side,
 const COURT = { x: 0, z: -100 };                  // badminton court on the far shore
 const FIELD = { x: -130, z: 92, hw: 16, hd: 11 };  // sunflower field just south of the house
 const HOMEBENCH = { x: -106, z: 76 };
+const BAR = { x: 100, z: 60, hw: 11, hd: 8 };      // a little bar on the east shore, door faces west toward the lake
 
 function rawHeight(x, z) {
   let base = 3 + (fbm(x * 0.018 + 3.1, z * 0.018 + 7.7) - 0.5) * 9;
@@ -168,9 +215,12 @@ function rawHeight(x, z) {
   return h;
 }
 // flatten small pads under buildings
-const PADS = [[CABIN, 9], [FIRE, 5], [BENCH, 3.5], [FARBENCH, 4], [MAIL, 2], [HOUSE, 27], [COURT, 17, 1.4], [FIELD, 25, 2.6], [HOMEBENCH, 3.5]].map(([p, r, h]) => ({ x: p.x, z: p.z, r, h: h ?? rawHeight(p.x, p.z) }));
+const PADS = [[CABIN, 9], [FIRE, 5], [BENCH, 3.5], [FARBENCH, 4], [MAIL, 2], [HOUSE, 27], [COURT, 17, 1.4], [FIELD, 25, 2.6], [HOMEBENCH, 3.5], [BAR, 24]].map(([p, r, h]) => ({ x: p.x, z: p.z, r, h: h ?? rawHeight(p.x, p.z) }));
 HOUSE.floorY = PADS[5].h + 0.45;
-const inHouse = (x, z, pad = 0) => Math.abs(x - HOUSE.x) < HOUSE.hw + pad && Math.abs(z - HOUSE.z) < HOUSE.hd + pad;
+BAR.floorY = PADS[9].h + 0.45;
+const BUILDINGS = [HOUSE, BAR];
+// which building (if any) a point is inside
+const inBuilding = (x, z, pad = 0) => BUILDINGS.find(b => Math.abs(x - b.x) < b.hw + pad && Math.abs(z - b.z) < b.hd + pad);
 function heightAt(x, z) {
   let h = rawHeight(x, z);
   for (const p of PADS) {
@@ -180,7 +230,7 @@ function heightAt(x, z) {
   return h;
 }
 const onDock = (x, z) => Math.abs(x - DOCK.x) < 1.5 && z > DOCK.z0 - 0.5 && z < DOCK.z1 + 0.5;
-const groundAt = (x, z) => inHouse(x, z, 0.2) ? HOUSE.floorY : onDock(x, z) ? Math.max(heightAt(x, z), DOCK.y) : heightAt(x, z);
+const groundAt = (x, z) => inBuilding(x, z, 0.2)?.floorY ?? (onDock(x, z) ? Math.max(heightAt(x, z), DOCK.y) : heightAt(x, z));
 const walkable = (x, z) => Math.hypot(x, z) < BOUND && (onDock(x, z) || heightAt(x, z) > -0.35);
 
 // a trail that loops all the way round the lakeshore
@@ -202,6 +252,7 @@ const PATHS = [
   [[COURT.x, -82], [COURT.x, COURT.z + 6]],
   [[HOUSE.x + HOUSE.hw + 3.5, HOUSE.z], [-110, 72], [-110, 92], [FIELD.x + FIELD.hw + 1, FIELD.z]],
   [[-110, 72], [HOMEBENCH.x, HOMEBENCH.z - 2]],
+  [[BENCH.x + 2, BENCH.z + 2], [78, 44], [BAR.x - BAR.hw - 3.5, BAR.z]],
 ];
 // walking aisles through the sunflowers (dirt, but no lanterns)
 const FIELD_AISLES = [
@@ -220,7 +271,7 @@ function pathDist(x, z) {
   return d;
 }
 const inField = (x, z, pad = 0) => Math.abs(x - FIELD.x) < FIELD.hw + pad && Math.abs(z - FIELD.z) < FIELD.hd + pad;
-const KEEP_CLEAR = [[CABIN, 10], [FIRE, 6], [BENCH, 4], [FARBENCH, 6], [MAIL, 3], [SPAWN, 5], [GIRL_HOME, 4], [STONE, 5], [{ x: 0, z: 46 }, 4], [HOUSE, 19], [COURT, 13], [{ x: COURT.x, z: COURT.z + 14 }, 7], [FIELD, 21], [HOMEBENCH, 4]];
+const KEEP_CLEAR = [[CABIN, 10], [FIRE, 6], [BENCH, 4], [FARBENCH, 6], [MAIL, 3], [SPAWN, 5], [GIRL_HOME, 4], [STONE, 5], [{ x: 0, z: 46 }, 4], [HOUSE, 19], [COURT, 13], [{ x: COURT.x, z: COURT.z + 14 }, 7], [FIELD, 21], [HOMEBENCH, 4], [BAR, 17]];
 const nearPOI = (x, z, pad = 0) => KEEP_CLEAR.some(([p, r]) => Math.hypot(x - p.x, z - p.z) < r + pad);
 
 /* ---------------------------------------------------------------- renderer */
@@ -233,7 +284,14 @@ renderer.outputColorSpace = THREE.SRGBColorSpace;
 // 1 = crisp, full resolution (default). higher = chunkier retro pixels
 let PIXEL = 1;
 const PIXEL_STEPS = [1, 2, 3, 4, 5];
-const DPR = Math.min(window.devicePixelRatio || 1, 2);
+// phones & tablets: lighter rendering + on-screen controls
+const TOUCH = matchMedia('(pointer: coarse)').matches || navigator.maxTouchPoints > 0 && !matchMedia('(pointer: fine)').matches;
+if (TOUCH) {
+  document.body.classList.add('touch');
+  document.querySelector('#overlay .start').textContent = '[ tap to begin ]';
+  document.querySelector('#overlay .keys').innerHTML = 'headphones recommended<br>left stick to walk (push all the way to run) · drag to look · pinch to zoom<br>e to interact · tap ♥ to call mira · ☾ to set the mood';
+}
+const DPR = Math.min(window.devicePixelRatio || 1, TOUCH ? 1.5 : 2);
 
 const scene = new THREE.Scene();
 scene.fog = new THREE.Fog(0xf4a582, 60, 300);
@@ -285,7 +343,7 @@ const stars = new THREE.Points(starGeo, starMat); scene.add(stars);
 const hemi = new THREE.HemisphereLight(0xffffff, 0x444444, 0.7); scene.add(hemi);
 const dirLight = new THREE.DirectionalLight(0xffffff, 1.5);
 dirLight.castShadow = true;
-dirLight.shadow.mapSize.set(2048, 2048);
+dirLight.shadow.mapSize.setScalar(TOUCH ? 1024 : 2048);
 Object.assign(dirLight.shadow.camera, { left: -40, right: 40, top: 40, bottom: -40, near: 1, far: 220 });
 dirLight.shadow.bias = -0.0006; dirLight.shadow.normalBias = 0.03;
 scene.add(dirLight, dirLight.target);
@@ -431,7 +489,7 @@ let roundMesh;
     const h = heightAt(x, z);
     if (h < 0.9 || h > 14 || pathDist(x, z) < 1.8) continue;
     if (Math.hypot(x - CABIN.x, z - CABIN.z) < 6 || Math.hypot(x - FIRE.x, z - FIRE.z) < 3) continue;
-    if (inHouse(x, z, 1.5) || inField(x, z) || (Math.abs(x - COURT.x) < 9.5 && Math.abs(z - COURT.z) < 5.5)) continue;
+    if (inBuilding(x, z, 1.5) || inField(x, z) || (Math.abs(x - COURT.x) < 9.5 && Math.abs(z - COURT.z) < 5.5)) continue;
     if (rand() < 0.88) grass.push({ x, y: h, z, s: rr(0.6, 1.3), ry: rr(0, 3), rz: rr(-0.25, 0.25), c: pick([0x7fa65a, 0x93b56c, 0x6f9a5e, 0xa9c26e]) });
     else flowers.push({ x, y: h + 0.25, z, s: rr(0.7, 1.2), c: pick([0xf7b2c4, 0xfff4e6, 0xf6d36b, 0xc9a7e8, 0xf28f7c]) });
   }
@@ -679,6 +737,219 @@ const house = { dishReady: false, cooking: false };
     cook: [{ x: HW(-7.5), z: HZ(-8.2), rot: Math.PI }, { x: HW(-4.8), z: HZ(-8.2), rot: Math.PI }],
     paint: [{ x: HW(5), z: HZ(-5.9), rot: Math.PI }, { x: HW(8.6), z: HZ(-5.9), rot: Math.PI }],
   };
+}
+
+/* ---------------------------------------------------------------- the bar: an indoor pond, two long-necked ducks, a candlelit table */
+const BX = (lx) => BAR.x + lx, BZ = (lz) => BAR.z + lz;
+const barUpper = new THREE.Group(); // roof + top of the walls, hidden while you're inside
+const bar = { ducks: [] };
+const POND = { x: -3, z: -3, r: 2.8 }; // local coords
+{
+  const g = new THREE.Group(); g.position.set(BAR.x, BAR.floorY, BAR.z);
+  barUpper.position.copy(g.position);
+  const { hw, hd } = BAR, WALL_H = 4.4, LOW = 1.3, T = 0.35;
+  const bx = (w, h, d, color, x, y, z, parent = g) => {
+    const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), typeof color === 'number' ? mat(color) : color);
+    m.position.set(x, y, z); parent.add(m); return m;
+  };
+  const cy = (rt, rb, h, color, x, y, z, seg = 8, parent = g) => {
+    const m = new THREE.Mesh(new THREE.CylinderGeometry(rt, rb, h, seg), typeof color === 'number' ? mat(color) : color);
+    m.position.set(x, y, z); parent.add(m); return m;
+  };
+  const solid = (x, z, w, d) => colliders.push({ box: [BX(x) - w / 2, BX(x) + w / 2, BZ(z) - d / 2, BZ(z) + d / 2] });
+  const outerM = mat(0x7a5844), innerM = mat(0xe3c39a), trim = mat(0xf0d9b5);
+
+  // foundation, dark plank floor
+  bx(2 * hw + 1.2, 3, 2 * hd + 1.2, 0x8f8797, 0, -1.55, 0);
+  bx(2 * hw, 0.3, 2 * hd, 0x8a6150, 0, -0.15, 0);
+  for (let z = -hd + 0.6; z < hd; z += 1.2) bx(2 * hw - 0.1, 0.02, 0.06, 0x6b4a3a, 0, 0.01, z);
+
+  // walls (dark wood outside, warm plaster inside), door gap on the west side
+  const wall = (x1, z1, x2, z2) => {
+    const alongX = Math.abs(x2 - x1) > Math.abs(z2 - z1), len = alongX ? Math.abs(x2 - x1) : Math.abs(z2 - z1);
+    const cx = (x1 + x2) / 2, cz = (z1 + z2) / 2, sx = alongX ? len + T : T, sz = alongX ? T : len + T;
+    bx(sx, LOW, sz, outerM, cx, LOW / 2, cz);
+    bx(sx, WALL_H - LOW, sz, outerM, cx, LOW + (WALL_H - LOW) / 2, cz, barUpper);
+    const ix = alongX ? 0 : -Math.sign(cx) * (T / 2 + 0.01), iz = alongX ? -Math.sign(cz) * (T / 2 + 0.01) : 0;
+    bx(alongX ? len : 0.02, LOW, alongX ? 0.02 : len, innerM, cx + ix, LOW / 2, cz + iz);
+    bx(alongX ? len : 0.02, WALL_H - LOW, alongX ? 0.02 : len, innerM, cx + ix, LOW + (WALL_H - LOW) / 2, cz + iz, barUpper);
+    solid(cx, cz, sx, sz);
+  };
+  wall(-hw, -hd, hw, -hd); wall(-hw, hd, hw, hd); wall(hw, -hd, hw, hd);
+  wall(-hw, -hd, -hw, -1.3); wall(-hw, 1.3, -hw, hd);
+  bx(T, WALL_H - 2.7, 2.6, outerM, -hw, 2.7 + (WALL_H - 2.7) / 2, 0, barUpper);
+  for (const z of [-1.35, 1.35]) bx(0.25, 2.7, 0.25, trim, -hw - 0.1, 1.35, z);
+
+  // roof + windows
+  const roof = new THREE.Mesh(new THREE.ConeGeometry(1, 1, 4).rotateY(Math.PI / 4), mat(0x3f5a4a));
+  roof.scale.set((2 * hw + 2.5) / Math.SQRT2, 4.8, (2 * hd + 2.5) / Math.SQRT2); roof.position.y = WALL_H + 2.4; barUpper.add(roof);
+  const winMat = glow(0x5a4a55);
+  for (const x of [-7, -1, 5]) for (const s of [-1, 1]) {
+    bx(1.8, 1.4, 0.1, trim, x, 2.6, s * (hd + T / 2 + 0.03), barUpper);
+    bx(1.5, 1.1, 0.12, winMat, x, 2.6, s * (hd + T / 2 + 0.05), barUpper);
+  }
+  for (const z of [-5, 5]) {
+    bx(0.1, 1.4, 1.8, trim, -hw - T / 2 - 0.03, 2.6, z, barUpper);
+    bx(0.12, 1.1, 1.5, winMat, -hw - T / 2 - 0.05, 2.6, z, barUpper);
+  }
+
+  // sign over the door
+  {
+    const cv = document.createElement('canvas'); cv.width = 256; cv.height = 64;
+    const ctx = cv.getContext('2d'), tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace;
+    const draw = () => {
+      ctx.fillStyle = '#3f5a4a'; ctx.fillRect(0, 0, 256, 64);
+      ctx.strokeStyle = '#f0d9b5'; ctx.lineWidth = 4; ctx.strokeRect(4, 4, 248, 56);
+      ctx.fillStyle = '#ffe2b8'; ctx.font = '40px VT323, monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText('the long neck', 128, 34); tex.needsUpdate = true;
+    };
+    draw(); document.fonts?.ready.then(draw);
+    const sign = new THREE.Mesh(new THREE.PlaneGeometry(3.2, 0.8), new THREE.MeshBasicMaterial({ map: tex }));
+    sign.position.set(-hw - T / 2 - 0.08, 3.4, 0); sign.rotation.y = -Math.PI / 2; barUpper.add(sign);
+  }
+
+  // porch with two lanterns + potted plants
+  bx(3.2, 0.25, 6, 0xa8805f, -hw - 1.7, -0.3, 0);
+  for (const z of [-2.7, 2.7]) {
+    bx(0.12, 2, 0.12, 0x6b4a3a, -hw - 3, 0.6, z);
+    bx(0.36, 0.42, 0.36, glow(0x6a5a50), -hw - 3, 1.8, z);
+    bx(0.6, 0.55, 0.6, 0xc8553d, -hw - 1, 0.27, z * 0.85);
+    const pl = new THREE.Mesh(new THREE.IcosahedronGeometry(0.5, 0), mat(0x6f9a5e)); pl.position.set(-hw - 1, 0.9, z * 0.85); g.add(pl);
+  }
+
+  /* the counter along the east wall */
+  bx(1.1, 1.15, 9, 0x8a6150, 7.4, 0.575, -0.5); solid(7.4, -0.5, 1.1, 9);
+  bx(1.4, 0.1, 9.3, 0x5a3d2e, 7.35, 1.2, -0.5);
+  for (const z of [-3.5, 0.5, 2.5]) { cy(0.05, 0.05, 0.4, 0xd9b45a, 7.6, 1.45, z, 6); cy(0.07, 0.07, 0.08, 0x3d3a50, 7.6, 1.66, z, 6); }
+  const glassM = new THREE.MeshStandardMaterial({ color: 0xcfe8ee, transparent: true, opacity: 0.55, roughness: 0.2 });
+  for (const z of [-1.6, -1.2, 1.4]) cy(0.09, 0.07, 0.22, glassM, 7.1, 1.36, z, 8);
+  // back shelves of bottles
+  bx(0.6, 3.2, 8, 0x6b4a3a, 10.4, 1.6, -0.5); solid(10.4, -0.5, 0.6, 8);
+  for (const y of [1.2, 1.95, 2.7]) {
+    bx(0.7, 0.06, 8, 0x5a3d2e, 10.15, y, -0.5);
+    for (let z = -4.2; z < 3.3; z += rr(0.35, 0.55)) {
+      const h = rr(0.35, 0.55), c = pick([0x4f7a5a, 0x93b56c, 0xc98a4b, 0xb5714f, 0xcfe8ee, 0x8d7bb8, 0xc8553d]);
+      cy(0.08, 0.1, h, c, 9.95, y + h / 2 + 0.03, z, 6);
+      cy(0.03, 0.04, 0.14, c, 9.95, y + h + 0.1, z, 5);
+    }
+  }
+  // stools
+  for (const z of [-3, -1, 1, 3]) {
+    cy(0.32, 0.3, 0.1, 0xc8553d, 6.1, 0.9, z, 10);
+    cy(0.06, 0.06, 0.85, 0x3d3a50, 6.1, 0.43, z, 6);
+    cy(0.25, 0.25, 0.04, 0x3d3a50, 6.1, 0.3, z, 8);
+  }
+  // pendant lamps over the counter
+  for (const z of [-3.5, -0.5, 2.5]) { bx(0.03, 1.1, 0.03, 0x3d3a50, 7.3, 3.85, z); cy(0.12, 0.35, 0.3, glow(0x8a7a60), 7.3, 3.2, z, 8); }
+
+  /* the pond, stones round the rim, a few lily pads */
+  const PX = POND.x, PZ = POND.z, PR = POND.r;
+  cy(PR + 0.15, PR + 0.15, 0.3, 0x5a6b7a, PX, 0.15, PZ, 24);
+  bar.water = cy(PR, PR, 0.04, new THREE.MeshStandardMaterial({ color: 0x6fb6d8, roughness: 0.25, metalness: 0.1, flatShading: true }), PX, 0.31, PZ, 24);
+  for (let i = 0; i < 22; i++) {
+    const a = i / 22 * Math.PI * 2, s = new THREE.Mesh(new THREE.DodecahedronGeometry(rr(0.28, 0.38), 0), mat(pick([0x9a95a8, 0x8c8796, 0xa9a3b0])));
+    s.position.set(PX + Math.cos(a) * (PR + 0.2), 0.3, PZ + Math.sin(a) * (PR + 0.2)); s.rotation.set(rr(0, 3), rr(0, 3), 0); g.add(s);
+  }
+  for (const [a, r] of [[0.4, 1.9], [2.1, 2.2], [3.6, 1.4], [5.0, 2.0]]) cy(0.32, 0.32, 0.02, 0x6f9a5e, PX + Math.cos(a) * r, 0.34, PZ + Math.sin(a) * r, 9);
+  const lotus = new THREE.Mesh(new THREE.IcosahedronGeometry(0.12, 0), mat(0xf7b2c4)); lotus.position.set(PX + Math.cos(2.1) * 2.2, 0.42, PZ + Math.sin(2.1) * 2.2); g.add(lotus);
+  // reeds by the rim
+  for (const [a, h] of [[1.2, 1.4], [1.35, 1.1], [4.3, 1.3], [4.45, 1.0], [4.2, 0.9]]) {
+    const rx = PX + Math.cos(a) * (PR + 0.55), rz = PZ + Math.sin(a) * (PR + 0.55);
+    cy(0.03, 0.04, h, 0x7fa65a, rx, h / 2, rz, 4);
+    cy(0.06, 0.06, 0.25, 0x8a6150, rx, h, rz, 5);
+  }
+  colliders.push({ x: BX(PX), z: BZ(PZ), r: PR + 0.45 });
+
+  /* the candlelit table for two, just south of the pond */
+  const TX = -3, TZ = 4.5;
+  cy(0.95, 0.95, 0.06, 0xa8805f, TX, 1.0, TZ, 16);
+  cy(1.0, 1.0, 0.04, 0xf6efe4, TX, 1.04, TZ, 16); // tablecloth
+  cy(0.08, 0.1, 1.0, 0x6b4a3a, TX, 0.5, TZ, 6);
+  cy(0.5, 0.5, 0.06, 0x6b4a3a, TX, 0.03, TZ, 10);
+  solid(TX, TZ, 1.7, 1.7);
+  for (const [x, back] of [[TX - 1.55, -0.35], [TX + 1.55, 0.35]]) {
+    bx(0.7, 0.1, 0.7, 0x8a6150, x, 0.55, TZ);
+    bx(0.1, 0.9, 0.7, 0x8a6150, x + back, 1.0, TZ);
+    for (const [lx, lz] of [[-0.28, -0.28], [0.28, -0.28], [-0.28, 0.28], [0.28, 0.28]]) bx(0.07, 0.55, 0.07, 0x6b4a3a, x + lx, 0.27, TZ + lz);
+  }
+  // candle in a little brass holder
+  cy(0.13, 0.16, 0.05, 0xd9b45a, TX, 1.09, TZ - 0.15, 10);
+  cy(0.06, 0.06, 0.36, 0xfff4e6, TX, 1.29, TZ - 0.15, 8);
+  bar.flame = new THREE.Mesh(new THREE.ConeGeometry(0.045, 0.14, 6), new THREE.MeshBasicMaterial({ color: 0xffc65a }));
+  bar.flame.position.set(TX, 1.55, TZ - 0.15); g.add(bar.flame);
+  const core = new THREE.Mesh(new THREE.ConeGeometry(0.022, 0.07, 5), new THREE.MeshBasicMaterial({ color: 0xfff2b0 }));
+  core.position.y = -0.02; bar.flame.add(core);
+  bar.candleLight = new THREE.PointLight(0xffb36b, 2, 8, 1.6); bar.candleLight.position.set(BX(TX), BAR.floorY + 1.75, BZ(TZ - 0.15)); scene.add(bar.candleLight);
+  // bread on a board: a scored loaf and a couple of slices
+  bx(0.62, 0.04, 0.36, 0x8a6150, TX, 1.08, TZ + 0.3);
+  const loaf = new THREE.Mesh(new THREE.IcosahedronGeometry(0.2, 1), mat(0xc98a4b)); loaf.scale.set(1.25, 0.7, 0.8); loaf.position.set(TX - 0.08, 1.21, TZ + 0.3); g.add(loaf);
+  for (const dx of [-0.18, -0.06, 0.06]) bx(0.025, 0.02, 0.2, 0x8a5a35, TX - 0.08 + dx, 1.345, TZ + 0.3).rotation.y = 0.5;
+  for (const dx of [0.2, 0.25]) bx(0.04, 0.15, 0.2, 0xf0d9b5, TX + dx, 1.17, TZ + 0.3).rotation.z = -0.35;
+  // two plates + two glasses of something red
+  const wineM = new THREE.MeshStandardMaterial({ color: 0x9a2f3f, transparent: true, opacity: 0.8, roughness: 0.3 });
+  for (const s of [-1, 1]) {
+    cy(0.22, 0.2, 0.025, 0xfff4e6, TX + s * 0.6, 1.08, TZ, 12);
+    cy(0.015, 0.015, 0.16, glassM, TX + s * 0.55, 1.14, TZ - 0.4, 5);
+    cy(0.08, 0.05, 0.14, wineM, TX + s * 0.55, 1.29, TZ - 0.4, 8);
+  }
+  bx(3.8, 0.02, 2.6, 0x8d4a52, TX, 0.02, TZ); // rug
+
+  // corner plants + a warm ceiling light
+  for (const [x, z] of [[-10, -7], [-10, 7], [9.8, 7], [3, -7.2]]) {
+    bx(0.6, 0.6, 0.6, 0xc8553d, x, 0.3, z);
+    const p = new THREE.Mesh(new THREE.IcosahedronGeometry(0.55, 0), mat(0x6f9a5e)); p.position.set(x, 1.05, z); g.add(p);
+  }
+  bar.light = new THREE.PointLight(0xffc68a, 0, 22, 1); bar.light.position.set(BX(1), BAR.floorY + 3.3, BZ(0)); scene.add(bar.light);
+
+  // the two long-necked white ducks
+  function makeLongNeck() {
+    const d = new THREE.Group(), white = mat(0xfaf3ea);
+    const body = new THREE.Mesh(new THREE.IcosahedronGeometry(0.34, 1), white); body.scale.set(0.95, 0.62, 1.45); body.position.y = 0.14; d.add(body);
+    for (const s of [-1, 1]) { const w = new THREE.Mesh(new THREE.IcosahedronGeometry(0.22, 0), white); w.scale.set(0.5, 0.55, 1.4); w.position.set(s * 0.25, 0.26, -0.08); w.rotation.x = 0.25; d.add(w); }
+    const tail = new THREE.Mesh(new THREE.ConeGeometry(0.13, 0.3, 4), white); tail.rotation.x = -Math.PI / 2 - 0.7; tail.position.set(0, 0.32, -0.5); d.add(tail);
+    // the neck pivots at the chest so it can dip into the water
+    const neck = new THREE.Group(); neck.position.set(0, 0.24, 0.34); d.add(neck);
+    let y = 0, z = 0;
+    for (const [len, tilt] of [[0.3, 0.55], [0.28, 0.15], [0.26, -0.2]]) {
+      const seg = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.075, len, 6), white);
+      seg.position.set(0, y + Math.cos(tilt) * len / 2, z + Math.sin(tilt) * len / 2); seg.rotation.x = tilt; neck.add(seg);
+      y += Math.cos(tilt) * len; z += Math.sin(tilt) * len;
+    }
+    const head = new THREE.Mesh(new THREE.IcosahedronGeometry(0.11, 0), white); head.scale.set(0.9, 0.9, 1.25); head.position.set(0, y + 0.04, z + 0.04); neck.add(head);
+    const beak = new THREE.Mesh(new THREE.ConeGeometry(0.045, 0.2, 4), mat(0xf08a3c)); beak.rotation.x = Math.PI / 2 + 0.35; beak.position.set(0, y, z + 0.2); neck.add(beak);
+    for (const s of [-1, 1]) { const e = new THREE.Mesh(new THREE.BoxGeometry(0.025, 0.035, 0.025), mat(0x1e1a24)); e.position.set(s * 0.085, y + 0.07, z + 0.07); neck.add(e); }
+    g.add(d);
+    return { d, neck };
+  }
+  for (let i = 0; i < 2; i++) {
+    const { d, neck } = makeLongNeck();
+    bar.ducks.push({ d, neck, a: i * Math.PI + 0.3, r: i ? 1.55 : 1.75, speed: i ? 0.21 : 0.19, wob: i * 2.3, dipAt: 3 + i * 4, dip: 0 });
+  }
+
+  scene.add(shadowAll(g), shadowAll(barUpper));
+  bar.flame.castShadow = core.castShadow = false;
+
+  const fy = BAR.floorY;
+  bar.table = { y: fy, rot: 0, seats: [{ x: BX(TX - 1.55), z: BZ(TZ), rot: Math.PI / 2, step: -0.9 }, { x: BX(TX + 1.55), z: BZ(TZ), rot: -Math.PI / 2, step: -0.9 }] };
+  bar.stools = { y: fy + 0.35, rot: Math.PI / 2, seats: [{ x: BX(6.1), z: BZ(-1), step: -0.9 }, { x: BX(6.1), z: BZ(1), step: -0.9 }] };
+}
+
+// ducks glide in slow circles round the pond and now and then dip their necks; the candle flickers
+function updateBar(dt, inside) {
+  for (const k of bar.ducks) {
+    k.a += k.speed * dt;
+    const x = POND.x + Math.sin(k.a) * k.r, z = POND.z + Math.cos(k.a) * k.r;
+    k.d.position.set(x, 0.29 + Math.sin(time * 2 + k.wob) * 0.015, z);
+    k.d.rotation.y = Math.atan2(Math.cos(k.a), -Math.sin(k.a));
+    k.d.rotation.z = Math.sin(time * 1.4 + k.wob) * 0.04;
+    if (time > k.dipAt) { k.dip = 1.6; k.dipAt = time + rr(5, 11); }
+    k.dip = Math.max(0, k.dip - dt);
+    k.neck.rotation.x = smoothstep(0, 0.4, k.dip) * smoothstep(1.6, 1.1, k.dip) * 1.65;
+  }
+  const f = 0.85 + Math.sin(time * 13) * 0.06 + Math.random() * 0.12;
+  bar.flame.scale.set(1, f, 1);
+  bar.candleLight.intensity = (inside ? 2.6 : 0.8 + nightness) * f;
+  bar.light.intensity = damp(bar.light.intensity, inside ? 4 + nightness * 6 : nightness * 2, 4, dt);
 }
 
 /* ---------------------------------------------------------------- sunflower field */
@@ -1081,7 +1352,7 @@ const pets = [];
 {
   const add = (o, home) => {
     const p = makePet(o); let x, z, k = 0;
-    do { x = home.x + rr(-home.r, home.r) * 0.6; z = home.z + rr(-home.r, home.r) * 0.6; } while ((!walkable(x, z) || inHouse(x, z, 1)) && k++ < 50);
+    do { x = home.x + rr(-home.r, home.r) * 0.6; z = home.z + rr(-home.r, home.r) * 0.6; } while ((!walkable(x, z) || inBuilding(x, z, 1)) && k++ < 50);
     p.position.set(x, groundAt(x, z), z); p.rotation.y = rr(0, 6); p.userData.home = home; pets.push(p); return p;
   };
   const snow = add({ kind: 'cat', name: 'snow', body: W, eyes: 0x5a8fc9 }, CAT_HOME);
@@ -1192,7 +1463,7 @@ const BIRD_PERCHES = [SPAWN, { x: FIELD.x + FIELD.hw + 5, z: FIELD.z }, { x: -10
 function groundSpot() {
   for (let k = 0; k < 30; k++) {
     const c = pick(BIRD_PERCHES), x = c.x + rr(-6, 6), z = c.z + rr(-6, 6);
-    if (heightAt(x, z) > 0.6 && !inHouse(x, z, 1) && walkable(x, z)) return new THREE.Vector3(x, groundAt(x, z), z);
+    if (heightAt(x, z) > 0.6 && !inBuilding(x, z, 1) && walkable(x, z)) return new THREE.Vector3(x, groundAt(x, z), z);
   }
   return new THREE.Vector3(SPAWN.x, groundAt(SPAWN.x, SPAWN.z), SPAWN.z);
 }
@@ -1381,6 +1652,10 @@ POIS.push(
   { x: COURT.x, z: COURT.z + 4.6, r: 3.5, label: 'play badminton', action: () => startBadminton() },
   { x: HOMEBENCH.x, z: HOMEBENCH.z, r: 2.5, label: 'sit down', title: 'porch bench', text: 'a bench by the house with a lamp and a still-warm mug. the whole lake is right there.', bench: benches[2] },
   { x: FIELD.x + FIELD.hw + 2.5, z: FIELD.z, r: 2.8, label: 'look', title: 'sunflower field', text: 'rows and rows of sunflowers, all turned toward the lake. there are little paths cut right through them.' },
+  { x: BAR.x - BAR.hw - 2.5, z: BAR.z, r: 2.5, label: 'look at the bar', title: 'the long neck', text: "a little bar on the east shore. you can hear water trickling inside, and the windows flicker with candlelight." },
+  { x: BX(-3), z: BZ(4.5), r: 2.3, label: 'sit at the candle table', action: () => sitTogether(bar.table, 'candle') },
+  { x: BX(5.3), z: BZ(0), r: 2.2, label: 'sit at the bar', action: () => sitTogether(bar.stools, 'bar') },
+  { x: BX(-3), z: BZ(-3), r: 4.3, label: 'watch the ducks', title: 'the pond', text: "two white ducks with impossibly long necks, gliding in slow circles. every so often one dips its head under. they never drift far from each other." },
 );
 
 const promptEl = document.getElementById('prompt'), cardEl = document.getElementById('card'), fadeEl = document.getElementById('fade');
@@ -1403,7 +1678,7 @@ const LINES = {
   greet: ["oh, hi. it's quiet today, huh?", "hey you. the ducks were looking for you.", "hi! i was just watching the water.", "oh, it's you. good."],
   talk: ["i come here when my head gets too loud.", "do you think the ducks have names? i call the little yellow one 'pudding'.", "the radio by the fire only plays one tape. i don't mind.",
     "if you sit still long enough, the lake starts to sound like music.", "someone keeps leaving tea on the bench. i think it's the cabin person.",
-    "there's an island in the middle. i've never been. maybe that's better.", "i like walking without going anywhere. is that weird?", "the far bench on the west side is my favourite. nobody goes there."],
+    "there's an island in the middle. i've never been. maybe that's better.", "i like walking without going anywhere. is that weird?", "the far bench on the west side is my favourite. nobody goes there.", "have you been to the little bar on the east shore? there's a pond inside. with ducks. real ones."],
   night: ["the fireflies are out!", "i like it best right when the lanterns come on.", "look up. you can see so many stars from here."],
   sit: ["...this is nice.", "we don't have to say anything.", "look, the ducks.", "i could stay here till the stars come out.", "thanks for sitting with me.", "hm hm hmm... (she's humming along to the radio)", "the water's so still today."],
   follow: ["okay! lead the way.", "sure, i'll come along.", "walk slow, okay?"],
@@ -1418,6 +1693,8 @@ const LINES = {
   rest: ["my legs are tired. sit with me?", "this spot's perfect. sit down for a bit?", "let's stop here a while.", "i'm sitting. you can join, if you want."],
   coming: ["coming!", "on my way~", "i'm here, i'm here!", "you called?"],
   field: ["they're taller than me!", "i love how they all face the same way.", "let's get lost in here for a bit."],
+  candle: ["candlelight suits you.", "split the bread with me? ...the crusty end is mine.", "look, they're doing the neck thing again.", "this feels like a secret place.", "i'm glad you brought me here."],
+  bar: ["two lemonades, please. ...oh, there's nobody here.", "i like the sound of the pond.", "do you think the ducks live here, or just visit?", "this stool spins a tiny bit. wheee."],
   sofa: ["this sofa is dangerously comfy.", "the fire's nice, huh.", "i could fall asleep right here.", "listen. the record's almost on side b."],
 };
 const line = (k) => pick(nightness > 0.6 && (k === 'talk' || k === 'sit') && rand() < 0.4 ? LINES.night : LINES[k]);
@@ -1465,11 +1742,13 @@ function playerSit(bench) {
 function playerStand() {
   const b = playerBench; playerBench = null; standUp(player);
   const ate = b === house.table && house.dishReady && time - sitSince > 5;
+  const shared = b === bar.table && time - sitSince > 5;
   if (ate) { house.dish.visible = false; house.dishReady = false; tablePOI.label = 'sit at the table'; }
   if (G.state === 'sit' || G.state === 'toSeat') {
     if (girl.userData.sitting) standUp(girl);
-    G.state = 'follow'; say(ate ? "that was delicious. i'll do the dishes. ...tomorrow." : line('stand'));
+    G.state = 'follow'; say(ate ? "that was delicious. i'll do the dishes. ...tomorrow." : shared ? "thank you for tonight. the bread was perfect." : line('stand'));
   } else if (ate) showCard({ title: 'kitchen', text: 'that was delicious.' });
+  else if (shared) showCard({ title: 'the long neck', text: 'you tore off a piece of bread. still warm. the candle burned a little lower.' });
 }
 function nearestBench(x, z) { return benches.reduce((a, b) => Math.hypot(b.x - x, b.z - z) < Math.hypot(a.x - x, a.z - z) ? b : a); }
 function fadeThen(fn, hold = 0) {
@@ -1673,7 +1952,7 @@ function pointTo(w) {
 function updateBadminton(dt) {
   const s = BM.s;
   // you
-  const ix = (keys.KeyD || keys.ArrowRight ? 1 : 0) - (keys.KeyA || keys.ArrowLeft ? 1 : 0);
+  const ix = clamp((keys.KeyD || keys.ArrowRight ? 1 : 0) - (keys.KeyA || keys.ArrowLeft ? 1 : 0) + stick.x, -1, 1);
   const px = clamp(player.position.x - COURT.x + ix * 6 * dt, -7.2, -0.6);
   player.position.set(COURT.x + px, COURT_Y, COURT.z);
   animateCharacter(player, Math.abs(ix) * 6, dt);
@@ -1772,7 +2051,7 @@ function callMira() {
     for (let k = 0; k < 16; k++) {
       const a = camYaw + rr(-0.7, 0.7), r = rr(16, 22);
       const x = player.position.x + Math.sin(a) * r, z = player.position.z + Math.cos(a) * r;
-      if (walkable(x, z) && !inHouse(x, z, 1)) { girl.position.set(x, groundAt(x, z), z); break; }
+      if (walkable(x, z) && !inBuilding(x, z, 1)) { girl.position.set(x, groundAt(x, z), z); break; }
     }
   }
   G.state = 'follow'; G.nextChat = time + 25; G.idle = 0;
@@ -1876,16 +2155,60 @@ addEventListener('keydown', e => {
   if (e.code === 'KeyP') { PIXEL = PIXEL_STEPS[(PIXEL_STEPS.indexOf(PIXEL) + 1) % PIXEL_STEPS.length]; resize(); }
 });
 addEventListener('keyup', e => { keys[e.code] = false; });
-addEventListener('blur', () => { for (const k in keys) keys[k] = false; });
+addEventListener('blur', () => { for (const k in keys) keys[k] = false; stick.x = stick.y = 0; });
 
-let camYaw = 0, camPitch = 0.42, camDist = 10, dragging = false;
-canvas.addEventListener('pointerdown', e => { dragging = true; canvas.setPointerCapture(e.pointerId); });
-canvas.addEventListener('pointerup', e => { dragging = false; canvas.releasePointerCapture(e.pointerId); });
-canvas.addEventListener('pointermove', e => {
-  if (!dragging) return;
-  camYaw -= e.movementX * 0.005;
-  camPitch = clamp(camPitch + e.movementY * 0.004, 0.05, 1.25);
+let camYaw = 0, camPitch = 0.42, camDist = 10;
+// drag to look (mouse or one finger), pinch with two fingers to zoom
+const drags = new Map(); let pinchD = 0;
+const pinchDist = () => { const [a, b] = [...drags.values()]; return Math.hypot(a.x - b.x, a.y - b.y); };
+canvas.addEventListener('pointerdown', e => {
+  drags.set(e.pointerId, { x: e.clientX, y: e.clientY }); canvas.setPointerCapture(e.pointerId);
+  pinchD = drags.size === 2 ? pinchDist() : 0;
 });
+const endDrag = e => { drags.delete(e.pointerId); pinchD = 0; };
+canvas.addEventListener('pointerup', endDrag);
+canvas.addEventListener('pointercancel', endDrag);
+canvas.addEventListener('pointermove', e => {
+  const d = drags.get(e.pointerId); if (!d) return;
+  const dx = e.clientX - d.x, dy = e.clientY - d.y; d.x = e.clientX; d.y = e.clientY;
+  if (drags.size === 1) {
+    const k = e.pointerType === 'touch' ? 1.6 : 1;
+    camYaw -= dx * 0.005 * k;
+    camPitch = clamp(camPitch + dy * 0.004 * k, 0.05, 1.25);
+  } else if (drags.size === 2) {
+    const pd = pinchDist(); if (pinchD) camDist = clamp(camDist - (pd - pinchD) * 0.04, 4, 22); pinchD = pd;
+  }
+});
+
+// on-screen joystick + buttons; the buttons just press the matching keys
+const stick = { x: 0, y: 0, id: null };
+{
+  const el = document.getElementById('stick'), knob = document.getElementById('knob');
+  const move = e => {
+    const r = el.getBoundingClientRect(), R = r.width / 2;
+    let dx = (e.clientX - r.left - R) / R, dy = (e.clientY - r.top - R) / R;
+    const m = Math.hypot(dx, dy); if (m > 1) { dx /= m; dy /= m; }
+    const live = m > 0.15;
+    stick.x = live ? dx : 0; stick.y = live ? dy : 0;
+    knob.style.transform = `translate(${dx * R * 0.6}px, ${dy * R * 0.6}px)`;
+  };
+  const release = e => { if (e.pointerId !== stick.id) return; stick.id = null; stick.x = stick.y = 0; knob.style.transform = ''; };
+  el.addEventListener('pointerdown', e => { e.preventDefault(); stick.id = e.pointerId; el.setPointerCapture(e.pointerId); move(e); });
+  el.addEventListener('pointermove', e => { if (e.pointerId === stick.id) move(e); });
+  el.addEventListener('pointerup', release); el.addEventListener('pointercancel', release);
+  const holdKey = (btn, code) => {
+    const up = () => { if (!btn.classList.contains('down')) return; btn.classList.remove('down'); dispatchEvent(new KeyboardEvent('keyup', { code })); };
+    btn.addEventListener('pointerdown', e => { e.preventDefault(); btn.classList.add('down'); dispatchEvent(new KeyboardEvent('keydown', { code })); });
+    btn.addEventListener('pointerup', up); btn.addEventListener('pointercancel', up); btn.addEventListener('pointerleave', up);
+  };
+  holdKey(document.getElementById('tAct'), 'KeyE');
+  holdKey(document.getElementById('tJump'), 'Space');
+  // tapping the prompt does the same as pressing e
+  document.getElementById('prompt').addEventListener('pointerdown', e => {
+    if (!e.currentTarget.classList.contains('show')) return;
+    e.preventDefault(); dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyE' })); dispatchEvent(new KeyboardEvent('keyup', { code: 'KeyE' }));
+  });
+}
 canvas.addEventListener('wheel', e => { camDist = clamp(camDist + e.deltaY * 0.01, 4, 22); }, { passive: true });
 
 /* ---------------------------------------------------------------- lofi music (all synthesized) */
@@ -2229,8 +2552,8 @@ function resolveCollisions(p, R = 0.4) {
 function updatePlayer(dt) {
   fwd.set(-Math.sin(camYaw), 0, -Math.cos(camYaw));
   right.set(Math.cos(camYaw), 0, -Math.sin(camYaw));
-  const ix = (keys.KeyD || keys.ArrowRight ? 1 : 0) - (keys.KeyA || keys.ArrowLeft ? 1 : 0);
-  const iz = (keys.KeyW || keys.ArrowUp ? 1 : 0) - (keys.KeyS || keys.ArrowDown ? 1 : 0);
+  const ix = (keys.KeyD || keys.ArrowRight ? 1 : 0) - (keys.KeyA || keys.ArrowLeft ? 1 : 0) + stick.x;
+  const iz = (keys.KeyW || keys.ArrowUp ? 1 : 0) - (keys.KeyS || keys.ArrowDown ? 1 : 0) - stick.y;
   dir.set(0, 0, 0).addScaledVector(fwd, iz).addScaledVector(right, ix);
   if (dir.lengthSq() > 0) dir.normalize();
   if (BM.active) { updateBadminton(dt); promptEl.classList.remove('show'); tickCard(); return; }
@@ -2246,7 +2569,9 @@ function updatePlayer(dt) {
     if (dir.lengthSq() > 0) playerStand();
     else { animateCharacter(player, 0, dt); promptEl.textContent = '[e] stand up'; promptEl.classList.add('show'); tickCard(); return; }
   }
-  const speed = keys.ShiftLeft || keys.ShiftRight ? 9 : 4.5;
+  // the stick walks slower when barely pushed, and runs when pushed all the way
+  const sm = Math.hypot(stick.x, stick.y);
+  const speed = keys.ShiftLeft || keys.ShiftRight || sm > 0.92 ? 9 : 4.5 * (sm > 0 ? Math.min(1, sm / 0.6) : 1);
   vel.x = damp(vel.x, dir.x * speed, 10, dt);
   vel.z = damp(vel.z, dir.z * speed, 10, dt);
 
@@ -2312,12 +2637,14 @@ function updateCamera(dt, snap = false) {
 }
 
 function updateHouse(dt) {
-  playerInside = inHouse(player.position.x, player.position.z, -0.3);
-  houseUpper.visible = !playerInside;
+  const inside = inBuilding(player.position.x, player.position.z, -0.3);
+  playerInside = !!inside;
+  houseUpper.visible = inside !== HOUSE; barUpper.visible = inside !== BAR;
   rainLines.visible = flakePts.visible = !playerInside;
-  const warm = playerInside ? 6 + nightness * 8 : nightness * 2;
+  updateBar(dt, inside === BAR);
+  const warm = inside === HOUSE ? 6 + nightness * 8 : nightness * 2;
   for (const l of house.lights) l.intensity = damp(l.intensity, warm, 4, dt);
-  house.fireLight.intensity = (playerInside ? 4 : 1.5) * (0.85 + Math.random() * 0.2);
+  house.fireLight.intensity = (inside === HOUSE ? 4 : 1.5) * (0.85 + Math.random() * 0.2);
   if (!music.muted && music.vibe !== 'off') house.disk.rotation.y += dt * 3;
   house.burnerMat.color.set(house.cooking ? 0xff6a2a : 0x3a3440);
   for (const s of house.steam) {
