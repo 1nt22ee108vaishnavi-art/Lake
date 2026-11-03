@@ -115,9 +115,9 @@
 
 <div class="hud" id="title">lake<small id="clock">6:00 pm</small></div>
 <div class="hud" id="music" title="toggle music (M)"><div class="bars"><i></i><i></i><i></i><i></i></div><span>lofi radio · side b</span></div>
-<div class="hud" id="help">wasd move · shift run · space jump<br>drag look · scroll zoom · e interact / talk / pet · 1-6 choose<br>c call mira · o mood · hold t fast-forward time · p pixel size · m music</div>
+<div class="hud" id="help">wasd move · shift run · space jump<br>drag look · scroll zoom · e interact / talk / pet · 1-6 choose<br>c call tup · o mood · hold t fast-forward time · p pixel size · m music</div>
 <div class="hud" id="moodBtn" title="set the mood (O)">☾ mood</div>
-<div class="hud" id="callBtn" title="call mira (C)">♥ call mira</div>
+<div class="hud" id="callBtn" title="call tup (C)">♥ call tup</div>
 <div id="moodPanel">
   <h3>set the mood</h3>
   <div class="sec">presets</div>
@@ -289,7 +289,7 @@ const TOUCH = matchMedia('(pointer: coarse)').matches || navigator.maxTouchPoint
 if (TOUCH) {
   document.body.classList.add('touch');
   document.querySelector('#overlay .start').textContent = '[ tap to begin ]';
-  document.querySelector('#overlay .keys').innerHTML = 'headphones recommended<br>left stick to walk (push all the way to run) · drag to look · pinch to zoom<br>e to interact · tap ♥ to call mira · ☾ to set the mood';
+  document.querySelector('#overlay .keys').innerHTML = 'headphones recommended<br>left stick to walk (push all the way to run) · drag to look · pinch to zoom<br>e to interact · tap ♥ to call tup · ☾ to set the mood';
 }
 const DPR = Math.min(window.devicePixelRatio || 1, TOUCH ? 1.5 : 2);
 
@@ -791,21 +791,6 @@ const POND = { x: -3, z: -3, r: 2.8 }; // local coords
   for (const z of [-5, 5]) {
     bx(0.1, 1.4, 1.8, trim, -hw - T / 2 - 0.03, 2.6, z, barUpper);
     bx(0.12, 1.1, 1.5, winMat, -hw - T / 2 - 0.05, 2.6, z, barUpper);
-  }
-
-  // sign over the door
-  {
-    const cv = document.createElement('canvas'); cv.width = 256; cv.height = 64;
-    const ctx = cv.getContext('2d'), tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace;
-    const draw = () => {
-      ctx.fillStyle = '#3f5a4a'; ctx.fillRect(0, 0, 256, 64);
-      ctx.strokeStyle = '#f0d9b5'; ctx.lineWidth = 4; ctx.strokeRect(4, 4, 248, 56);
-      ctx.fillStyle = '#ffe2b8'; ctx.font = '40px VT323, monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.fillText('the long neck', 128, 34); tex.needsUpdate = true;
-    };
-    draw(); document.fonts?.ready.then(draw);
-    const sign = new THREE.Mesh(new THREE.PlaneGeometry(3.2, 0.8), new THREE.MeshBasicMaterial({ map: tex }));
-    sign.position.set(-hw - T / 2 - 0.08, 3.4, 0); sign.rotation.y = -Math.PI / 2; barUpper.add(sign);
   }
 
   // porch with two lanterns + potted plants
@@ -1310,6 +1295,7 @@ const CAT_HOME = { x: -107, z: 67, r: 9 };
 // all the dogs live around the big house: two by the front porch, two along the north side
 const HOUSE_DOG_HOME = { x: -109, z: 58, r: 5 };
 const DOG_HOME = { x: -112, z: 47, r: 6 };
+const DOG_LEASH = 24; // dogs follow you around the house, but won't leave home
 function makePet(o) {
   const dog = o.kind === 'dog', g = new THREE.Group(), rig = new THREE.Group(); g.add(rig);
   const M = (c) => mat(c);
@@ -1407,12 +1393,13 @@ function updatePets(dt) {
   for (const pet of pets) {
     const u = pet.userData, p = pet.position, dP = Math.hypot(pp.x - p.x, pp.z - p.z);
     let tx = p.x, tz = p.z, sp = 2, wantRest = false;
+    const nearHome = Math.hypot(pp.x - u.home.x, pp.z - u.home.z) < DOG_LEASH;
     u.t -= dt; u.cool -= dt; u.wag = false;
     if (u.petted > 0) {
       u.petted -= dt; faceToward(pet, Math.atan2(pp.x - p.x, pp.z - p.z), dt, 5);
       u.wag = true; wantRest = u.kind === 'cat';
-    } else if (u.kind === 'dog' && (u.follow > 0 || (dP < 9 && u.cool <= 0 && !BM.active))) {
-      // dogs tag along with you for a while
+    } else if (u.kind === 'dog' && nearHome && (u.follow > 0 || (dP < 9 && u.cool <= 0 && !BM.active))) {
+      // dogs tag along with you for a while, as long as you stay around the house
       if (u.follow <= 0) u.follow = rr(70, 130);
       u.follow -= dt; if (u.follow <= 0 || dP > 45) { u.follow = 0; u.cool = 40; }
       const a = player.rotation.y + Math.PI + u.slot;
@@ -1535,11 +1522,6 @@ function makeCharacter(o) {
     const beanie = new THREE.Mesh(new THREE.SphereGeometry(0.315, 8, 5, 0, Math.PI * 2, 0, Math.PI / 2), mat(o.beanie)); beanie.position.y = 0.04; head.add(beanie);
     const pom = new THREE.Mesh(new THREE.IcosahedronGeometry(0.09, 0), mat(0xfff4e6)); pom.position.y = 0.38; head.add(pom);
   }
-  if (o.phones) {
-    const phones = mat(o.phones);
-    const band = new THREE.Mesh(new THREE.TorusGeometry(0.34, 0.035, 4, 10, Math.PI), phones); band.position.y = 0.02; head.add(band);
-    for (const x of [-0.33, 0.33]) { const cup = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.11, 0.08, 8), phones); cup.rotation.z = Math.PI / 2; cup.position.set(x, -0.02, 0); head.add(cup); }
-  }
   if (o.hair) {
     const hair = mat(o.hair);
     const cap = new THREE.Mesh(new THREE.SphereGeometry(0.325, 8, 6, 0, Math.PI * 2, 0, Math.PI * 0.55), hair); cap.position.y = 0.02; cap.rotation.x = -0.25; head.add(cap);
@@ -1616,7 +1598,7 @@ function faceToward(ch, angle, dt, k = 12) {
   ch.rotation.y += diff * (1 - Math.exp(-k * dt));
 }
 
-const player = makeCharacter({ top: 0xe9a65a, skin: 0xf2c9a5, bottom: 0x4a4e74, shoes: 0xfff4e6, beanie: 0xc8553d, phones: 0x3d3a50, scale: 1.05 });
+const player = makeCharacter({ top: 0xe9a65a, skin: 0xf2c9a5, bottom: 0x4a4e74, shoes: 0xfff4e6, beanie: 0xc8553d, scale: 1.05 });
 player.position.set(SPAWN.x, groundAt(SPAWN.x, SPAWN.z), SPAWN.z);
 player.rotation.y = Math.PI;
 
@@ -1652,7 +1634,7 @@ POIS.push(
   { x: COURT.x, z: COURT.z + 4.6, r: 3.5, label: 'play badminton', action: () => startBadminton() },
   { x: HOMEBENCH.x, z: HOMEBENCH.z, r: 2.5, label: 'sit down', title: 'porch bench', text: 'a bench by the house with a lamp and a still-warm mug. the whole lake is right there.', bench: benches[2] },
   { x: FIELD.x + FIELD.hw + 2.5, z: FIELD.z, r: 2.8, label: 'look', title: 'sunflower field', text: 'rows and rows of sunflowers, all turned toward the lake. there are little paths cut right through them.' },
-  { x: BAR.x - BAR.hw - 2.5, z: BAR.z, r: 2.5, label: 'look at the bar', title: 'the long neck', text: "a little bar on the east shore. you can hear water trickling inside, and the windows flicker with candlelight." },
+  { x: BAR.x - BAR.hw - 2.5, z: BAR.z, r: 2.5, label: 'look at the bar', title: 'the bar', text: "a little bar on the east shore. you can hear water trickling inside, and the windows flicker with candlelight." },
   { x: BX(-3), z: BZ(4.5), r: 2.3, label: 'sit at the candle table', action: () => sitTogether(bar.table, 'candle') },
   { x: BX(5.3), z: BZ(0), r: 2.2, label: 'sit at the bar', action: () => sitTogether(bar.stools, 'bar') },
   { x: BX(-3), z: BZ(-3), r: 4.3, label: 'watch the ducks', title: 'the pond', text: "two white ducks with impossibly long necks, gliding in slow circles. every so often one dips its head under. they never drift far from each other." },
@@ -1671,11 +1653,11 @@ function showCard(p) {
 }
 function hideCard() { cardPOI = null; menuOpen = false; clearInterval(typer); cardEl.classList.remove('show'); }
 
-/* ---------------------------------------------------------------- mira (npc) */
-const NAME = 'mira';
+/* ---------------------------------------------------------------- tup (npc) */
+const NAME = 'tup', PLAYER = 'put';
 const say = (text) => showCard({ title: NAME, text });
 const LINES = {
-  greet: ["oh, hi. it's quiet today, huh?", "hey you. the ducks were looking for you.", "hi! i was just watching the water.", "oh, it's you. good."],
+  greet: ["oh, hi put. it's quiet today, huh?", "put! there you are.", "hey you. the ducks were looking for you.", "hi! i was just watching the water.", "oh, it's you. good."],
   talk: ["i come here when my head gets too loud.", "do you think the ducks have names? i call the little yellow one 'pudding'.", "the radio by the fire only plays one tape. i don't mind.",
     "if you sit still long enough, the lake starts to sound like music.", "someone keeps leaving tea on the bench. i think it's the cabin person.",
     "there's an island in the middle. i've never been. maybe that's better.", "i like walking without going anywhere. is that weird?", "the far bench on the west side is my favourite. nobody goes there.", "have you been to the little bar on the east shore? there's a pond inside. with ducks. real ones."],
@@ -1748,7 +1730,7 @@ function playerStand() {
     if (girl.userData.sitting) standUp(girl);
     G.state = 'follow'; say(ate ? "that was delicious. i'll do the dishes. ...tomorrow." : shared ? "thank you for tonight. the bread was perfect." : line('stand'));
   } else if (ate) showCard({ title: 'kitchen', text: 'that was delicious.' });
-  else if (shared) showCard({ title: 'the long neck', text: 'you tore off a piece of bread. still warm. the candle burned a little lower.' });
+  else if (shared) showCard({ title: 'the bar', text: 'you tore off a piece of bread. still warm. the candle burned a little lower.' });
 }
 function nearestBench(x, z) { return benches.reduce((a, b) => Math.hypot(b.x - x, b.z - z) < Math.hypot(a.x - x, a.z - z) ? b : a); }
 function fadeThen(fn, hold = 0) {
@@ -1837,7 +1819,7 @@ function doCook() {
       house.cooking = false; music.sizzle(false);
       if (!done) { showCard({ title: 'kitchen', text: 'you turn the stove off. maybe later.' }); return; }
       const d = pick(DISHES); serveDish(d);
-      showCard({ title: 'kitchen', text: `you made ${d.name}. ` + (withHer ? 'mira sets the table for two.' : 'it smells amazing.') });
+      showCard({ title: 'kitchen', text: `you made ${d.name}. ` + (withHer ? 'tup sets the table for two.' : 'it smells amazing.') });
     },
   });
 }
@@ -1892,7 +1874,7 @@ function doPaint() {
     onEnd: (withHer, done, a) => {
       if (!done) { showCard({ title: 'the studio', text: "you leave it half-finished. that's a style too." }); return; }
       a.paint.forEach(p => revealPainting(p, 1));
-      showCard({ title: 'the studio', text: `you painted "${a.paint[0].title}".` + (withHer ? ` mira painted "${a.paint[1].title}". she says hers isn't finished. it is.` : '') });
+      showCard({ title: 'the studio', text: `you painted "${a.paint[0].title}".` + (withHer ? ` tup painted "${a.paint[1].title}". she says hers isn't finished. it is.` : '') });
     },
   });
 }
@@ -1906,9 +1888,9 @@ function nextRecord() {
 const BM = { active: false, score: [0, 0], server: 0, phase: 'serve', t: 0, s: { x: 0, y: 0, vx: 0, vy: 0 }, last: -1, rally: 0, target: 3, decided: false, window: 0, smash: false, wasSmash: false, over: false };
 const GRAV = 9;
 const scoreEl = document.getElementById('score');
-function showScore() { scoreEl.innerHTML = `you <b>${BM.score[0]}</b> — <b>${BM.score[1]}</b> ${NAME}`; }
+function showScore() { scoreEl.innerHTML = `${PLAYER} <b>${BM.score[0]}</b> — <b>${BM.score[1]}</b> ${NAME}`; }
 function startBadminton() {
-  if (!miraNearby()) { showCard({ title: 'badminton court', text: "two rackets lean against the net post. you'll need someone to play with. maybe mira's up for it?" }); return; }
+  if (!miraNearby()) { showCard({ title: 'badminton court', text: "two rackets lean against the net post. you'll need someone to play with. maybe tup's up for it?" }); return; }
   fadeThen(() => {
     if (playerBench) playerStand();
     Object.assign(BM, { active: true, score: [0, 0], server: 0, over: false });
@@ -1957,7 +1939,7 @@ function updateBadminton(dt) {
   player.position.set(COURT.x + px, COURT_Y, COURT.z);
   animateCharacter(player, Math.abs(ix) * 6, dt);
   BM.window -= dt;
-  // mira
+  // tup
   const gx = girl.position.x - COURT.x;
   let goal = 3.5, gs = 2.5;
   if (BM.phase === 'rally' && BM.last === 0) { goal = clamp(BM.target + 0.35, 0.8, 7.2); gs = 5.6; }
@@ -2045,7 +2027,7 @@ function callMira() {
   if (BM.active || PA || G.state === 'activity' || (G.state === 'sit' && playerBench)) return;
   const d = Math.hypot(girl.position.x - player.position.x, girl.position.z - player.position.z);
   if (d < 4 && G.state === 'follow') { say("i'm right here, silly."); return; }
-  showCard({ title: 'you', text: pick(['miraaa!', 'hey mira, over here!', 'mira! come here!']) });
+  showCard({ title: PLAYER, text: pick(['tuuup!', 'hey tup, over here!', 'tup! come here!']) });
   if (girl.userData.sitting) standUp(girl);
   if (d > 40) { // she was far away: she jogs in from just out of sight
     for (let k = 0; k < 16; k++) {
@@ -2597,7 +2579,7 @@ function updatePlayer(dt) {
   if (hs > 0.3) faceToward(player, Math.atan2(vel.x, vel.z), dt);
   animateCharacter(player, grounded ? hs : 0, dt);
 
-  // points of interest (mira takes priority)
+  // points of interest (tup takes priority)
   const dGirl = Math.hypot(p.x - girl.position.x, p.z - girl.position.z);
   let best = null, bd = Infinity;
   if (dGirl < 2.8) best = 'girl';
@@ -2621,8 +2603,8 @@ function updateCamera(dt, snap = false) {
     camTarget.set(COURT.x, COURT_Y + 1.5, COURT.z);
     camPos.set(COURT.x + (player.position.x - COURT.x) * 0.2, COURT_Y + 5.5, COURT.z + 13.5);
   } else {
-    // indoors: look down into the rooms like a dollhouse
-    const pitch = playerInside ? Math.max(camPitch, 0.95) : camPitch, dist = playerInside ? Math.min(camDist, 12) : camDist;
+    // indoors: orbit freely, just pulled in a little closer
+    const pitch = playerInside ? Math.max(camPitch, 0.12) : camPitch, dist = playerInside ? Math.min(camDist, 9) : camDist;
     camTarget.copy(player.position); camTarget.y += 1.3;
     camPos.set(
       camTarget.x + Math.sin(camYaw) * Math.cos(pitch) * dist,
