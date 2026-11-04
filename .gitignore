@@ -4,3 +4,4 @@ _test.html
 Thumbs.db
 
 .vercel
+.env*
